@@ -1,0 +1,32 @@
+<fta:FATCA_OECD xmlns:fta="urn:oecd:ties:fatca:v2" xmlns:sfa="urn:oecd:ties:stffatcatypes:v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0" xsi:schemaLocation="urn:oecd:ties:fatca:v2">
+	<fta:MessageSpec>
+		<sfa:SendingCompanyIN>000000.00000.TA.152</sfa:SendingCompanyIN>
+		<sfa:TransmittingCountry>CL</sfa:TransmittingCountry>
+		<sfa:ReceivingCountry>US</sfa:ReceivingCountry>
+		<sfa:MessageType>FATCA</sfa:MessageType>
+		<sfa:MessageRefId>4_Test_Packet_Schema_v2</sfa:MessageRefId>
+		<sfa:ReportingPeriod>2020-12-30</sfa:ReportingPeriod>
+		<sfa:Timestamp>2020-12-30T16:12:38</sfa:Timestamp>
+	</fta:MessageSpec>
+	<fta:FATCA>
+		<fta:ReportingFI>
+			<sfa:ResCountryCode>CL</sfa:ResCountryCode>
+			<sfa:TIN issuedBy="US">2IW3WK.00000.LE.152</sfa:TIN>
+			<sfa:Name>Org Name</sfa:Name>
+			<sfa:Address>
+				<sfa:CountryCode>US</sfa:CountryCode>
+				<sfa:AddressFix>
+					<sfa:Street>123 Street</sfa:Street>
+					<sfa:PostCode>75244</sfa:PostCode>
+					<sfa:City>City</sfa:City>
+					<sfa:CountrySubentity>TX</sfa:CountrySubentity>
+				</sfa:AddressFix>
+				<sfa:AddressFree>123 Address/City/State/Zip/Country</sfa:AddressFree>
+			</sfa:Address>
+			<fta:DocSpec>
+				<fta:DocTypeIndic>FATCA11</fta:DocTypeIndic>
+				<fta:DocRefId>2IW3WK.00000.LE.152.93cbaf0f-5f32-b473-9aee-5cf324a753d1</fta:DocRefId>
+			</fta:DocSpec>
+		</fta:ReportingFI>
+	</fta:FATCA>
+</fta:FATCA_OECD>

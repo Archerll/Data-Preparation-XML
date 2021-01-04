@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReportingGroup>
+	<ftc:AccountReport>
+		<ftc:DocSpec>
+			<ftc:DocTypeIndic>FATCA11</ftc:DocTypeIndic>
+			<ftc:DocRefId>1</ftc:DocRefId>
+		</ftc:DocSpec>
+		<ftc:AccountNumber>8821800060-001AUD</ftc:AccountNumber>
+		<ftc:AccountHolder>
+			<ftc:Organisation>
+				<sfa:TIN>7788999</sfa:TIN>
+				<sfa:Name>Shirley</sfa:Name>
+				<sfa:Address>tyuiiooy street</sfa:Address>
+			</ftc:Organisation>
+			<ftc:AcctHolderType>FATCA104</ftc:AcctHolderType>
+		</ftc:AccountHolder>
+		<ftc:AccountBalance currCode="AUD">1000455.16</ftc:AccountBalance>
+		<ftc:Payment>
+			<ftc:Type>FATCA502</ftc:Type>
+			<ftc:PaymentAmnt currCode="AUD">nan</ftc:PaymentAmnt>
+		</ftc:Payment>
+	</ftc:AccountReport>
+	<ftc:AccountReport>
+		<ftc:DocSpec>
+			<ftc:DocTypeIndic>FATCA11</ftc:DocTypeIndic>
+			<ftc:DocRefId>1</ftc:DocRefId>
+		</ftc:DocSpec>
+		<ftc:AccountNumber>8821800060-001CNY</ftc:AccountNumber>
+		<ftc:AccountHolder>
+			<ftc:Organisation>
+				<sfa:TIN>7788999</sfa:TIN>
+				<sfa:Name>Shirley</sfa:Name>
+				<sfa:Address>tyuiiooy street</sfa:Address>
+			</ftc:Organisation>
+			<ftc:AcctHolderType>FATCA104</ftc:AcctHolderType>
+		</ftc:AccountHolder>
+		<ftc:AccountBalance currCode="CNY">4918749.57</ftc:AccountBalance>
+		<ftc:Payment>
+			<ftc:Type>FATCA502</ftc:Type>
+			<ftc:PaymentAmnt currCode="CNY">149014.54</ftc:PaymentAmnt>
+		</ftc:Payment>
+	</ftc:AccountReport>
+	<ftc:AccountReport>
+		<ftc:DocSpec>
+			<ftc:DocTypeIndic>FATCA11</ftc:DocTypeIndic>
+			<ftc:DocRefId>1</ftc:DocRefId>
+		</ftc:DocSpec>
+		<ftc:AccountNumber>8821800060-001USD</ftc:AccountNumber>
+		<ftc:AccountHolder>
+			<ftc:Organisation>
+				<sfa:TIN>7788999</sfa:TIN>
+				<sfa:Name>Shirley</sfa:Name>
+				<sfa:Address>tyuiiooy street</sfa:Address>
+			</ftc:Organisation>
+			<ftc:AcctHolderType>FATCA104</ftc:AcctHolderType>
+		</ftc:AccountHolder>
+		<ftc:AccountBalance currCode="USD">489666.24</ftc:AccountBalance>
+		<ftc:Payment>
+			<ftc:Type>FATCA502</ftc:Type>
+			<ftc:PaymentAmnt currCode="USD">293.79</ftc:PaymentAmnt>
+		</ftc:Payment>
+	</ftc:AccountReport>
+</ReportingGroup>

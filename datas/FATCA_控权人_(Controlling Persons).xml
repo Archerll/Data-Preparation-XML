@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReportingGroup>
+	<ftc:AccountReport>
+		<ftc:DocSpec>
+			<ftc:DocTypeIndic>FATCA11</ftc:DocTypeIndic>
+			<ftc:DocRefId>1</ftc:DocRefId>
+		</ftc:DocSpec>
+		<ftc:AccountNumber>8821800060-001AUD</ftc:AccountNumber>
+		<ftc:AccountHolder>
+			<ftc:Organisation>
+				<sfa:Name>Shirley</sfa:Name>
+				<sfa:Address>tyuiiooy street</sfa:Address>
+			</ftc:Organisation>
+			<ftc:AcctHolderType>FATCA104</ftc:AcctHolderType>
+		</ftc:AccountHolder>
+		<SubstantialOwner>
+			<Individual>
+				<TIN>445566.0</TIN>
+				<Name>David</Name>
+				<Address>789 street</Address>
+			</Individual>
+		</SubstantialOwner>
+		<SubstantialOwner>
+			<Individual>
+				<TIN>112233.0</TIN>
+				<Name>Peter</Name>
+				<Address>123456 street</Address>
+			</Individual>
+		</SubstantialOwner>
+		<ftc:AccountBalance currCode="AUD">1000455.16</ftc:AccountBalance>
+		<ftc:Payment>
+			<ftc:Type>FATCA502</ftc:Type>
+			<ftc:PaymentAmnt currCode="AUD">nan</ftc:PaymentAmnt>
+		</ftc:Payment>
+	</ftc:AccountReport>
+	<ftc:AccountReport>
+		<ftc:DocSpec>
+			<ftc:DocTypeIndic>FATCA11</ftc:DocTypeIndic>
+			<ftc:DocRefId>1</ftc:DocRefId>
+		</ftc:DocSpec>
+		<ftc:AccountNumber>8821800060-001CNY</ftc:AccountNumber>
+		<ftc:AccountHolder>
+			<ftc:Organisation>
+				<sfa:Name>Shirley</sfa:Name>
+				<sfa:Address>tyuiiooy street</sfa:Address>
+			</ftc:Organisation>
+			<ftc:AcctHolderType>FATCA104</ftc:AcctHolderType>
+		</ftc:AccountHolder>
+		<SubstantialOwner>
+			<Individual>
+				<TIN>445567.0</TIN>
+				<Name>David</Name>
+				<Address>790 street</Address>
+			</Individual>
+		</SubstantialOwner>
+		<ftc:AccountBalance currCode="CNY">4918749.57</ftc:AccountBalance>
+		<ftc:Payment>
+			<ftc:Type>FATCA502</ftc:Type>
+			<ftc:PaymentAmnt currCode="CNY">149014.54</ftc:PaymentAmnt>
+		</ftc:Payment>
+	</ftc:AccountReport>
+	<ftc:AccountReport>
+		<ftc:DocSpec>
+			<ftc:DocTypeIndic>FATCA11</ftc:DocTypeIndic>
+			<ftc:DocRefId>1</ftc:DocRefId>
+		</ftc:DocSpec>
+		<ftc:AccountNumber>8821800060-001USD</ftc:AccountNumber>
+		<ftc:AccountHolder>
+			<ftc:Organisation>
+				<sfa:Name>Shirley</sfa:Name>
+				<sfa:Address>tyuiiooy street</sfa:Address>
+			</ftc:Organisation>
+			<ftc:AcctHolderType>FATCA104</ftc:AcctHolderType>
+		</ftc:AccountHolder>
+		<SubstantialOwner>
+			<Individual>
+				<TIN>445568.0</TIN>
+				<Name>David</Name>
+				<Address>791 street</Address>
+			</Individual>
+		</SubstantialOwner>
+		<SubstantialOwner>
+			<Individual>
+				<TIN>112235.0</TIN>
+				<Name>Peter</Name>
+				<Address>123458 street</Address>
+			</Individual>
+		</SubstantialOwner>
+		<ftc:AccountBalance currCode="USD">489666.24</ftc:AccountBalance>
+		<ftc:Payment>
+			<ftc:Type>FATCA502</ftc:Type>
+			<ftc:PaymentAmnt currCode="USD">293.79</ftc:PaymentAmnt>
+		</ftc:Payment>
+	</ftc:AccountReport>
+</ReportingGroup>
