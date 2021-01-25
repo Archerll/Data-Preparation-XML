@@ -3,18 +3,20 @@
 __author__ = 'Archer'
 import pandas as pd
 import hashlib
-from xml.dom.minidom import Document
 import xml.etree.ElementTree as ET
-from datetime import datetime as dt
 import os
 import re
-from tkinter import messagebox
+import tkinter as tk
+import uuid
 
+from tkinter import messagebox
+from xml.dom.minidom import Document
+from datetime import datetime as dt
 # 注册命名空间
 ET.register_namespace('sfa', 'urn:oecd:ties:stffatcatypes:v2')
 ET.register_namespace('ftc', 'urn:oecd:ties:fatca:v2')
 sfa = {'sfa': 'urn:oecd:ties:stffatcatypes:v2'}
-fta = {'ftc': 'urn:oecd:ties:fatca:v2'}
+ftc = {'ftc': 'urn:oecd:ties:fatca:v2'}
 # Example ID
 tin = ''
 FATCAEntitySenderId = ''
@@ -44,8 +46,8 @@ def check_curr(currCode, balance, payment):
                 payment = str(int(float(payment)))
         if re.search('\.', balance) or re.search('\.', payment):
             print('日元数值异常！')
-            print(re.search('\.', balance), balance)
-            print(re.search('\.', payment))
+            # print(re.search('\.', balance), balance)
+            # print(re.search('\.', payment))
             return 1
     else:
         if re.search('\.[0-9]{2}', balance) and (re.search('\.[0-9]{2}', payment) or payment == 'nan'):
@@ -71,28 +73,58 @@ def get_md5str(string):
     return time_md5
 
 
-# 为xml设置传输日期和唯一标识
-def set_xml(datetime):
+def type_indic(lastFile, upTest = False):
+    if lastFile and upTest:
+        typeIndic = 'FATCA14'
+    elif not lastFile and upTest:
+        typeIndic = 'FATCA11'
+    elif lastFile and not upTest:
+        typeIndic = 'FATCA4'
+    else:
+        typeIndic = 'FATCA1'
+    return typeIndic
+
+
+def get_Id():
     tree = ET.parse('FATCA.xml')
     root = tree.getroot()
     # 设置传输信息的唯一ID
     # print(root[0][4].tag+':'+root[0][4].text)
     global tin
-    tin = root[1][0].find('sfa:TIN', sfa).text
     global FATCAEntitySenderId
+    tin = root[1][0].find('sfa:TIN', sfa).text
     FATCAEntitySenderId = root[0].find('sfa:SendingCompanyIN', sfa).text
 
+
+# 为xml设置传输日期和唯一标识
+def set_xml(datetime,lastfile, dic):
+    tree = ET.parse('FATCA.xml')
+    root = tree.getroot()
+    if lastfile:
+        element1 = ET.Element('sfa:CorrMessageRefId')
+        element1.text = dic['MessageRefId']
+        element2 = ET.Element('ftc:CorrDocRefId')
+        element2.text = dic['FI_DocRefId']
+        element3 = ET.Element('ftc:CorrMessageRefId')
+        element3.text = dic['MessageRefId']
+        root[0].insert(5, element1)
+        root[1][0][4].append(element3)
+        root[1][0][4].append(element2)
+
+    MessageRefId = root[0].find('sfa:MessageRefId', sfa)
+    MessageRefId.text = str(uuid.uuid4())
     ReportingPeriod = root[0].find('sfa:ReportingPeriod', sfa)
-    ReportingPeriod.text = datetime.date().strftime('%Y-%m-%d')
+    ReportingPeriod.text = '{0}-12-31'.format(datetime.year-1)
     Timestamp = root[0].find('sfa:Timestamp', sfa)
     Timestamp.text = datetime.strftime('%Y-%m-%dT%H:%M:%S')
-    DocRefId = root[1][0][4].find('ftc:DocRefId', fta)
-    DocRefId.text = tin+'.'+get_md5str(datetime)
+    DocRefId = root[1][0][4].find('ftc:DocRefId', ftc)
+    DocRefId.text = tin+'.'+str(uuid.uuid4())
     # print(root[0][5].tag + ':' + root[0][5].text)
     # print(root[0][6].tag + ':' + root[0][6].text)
-    tree.write('FATCA.xml')
+    tree.write('FATCA2.xml')
 
 
+# 将生成的xml中间文件数据读取
 def insert_info(file, file_name):
     with open("datas\\{0}.xml".format(file_name), 'r', encoding='UTF8') as cell:
         lines = cell.readlines()[1:]
@@ -103,6 +135,64 @@ def insert_info(file, file_name):
             file.insert(31 + count, '\t\t' + line)
             count += 1
     return file
+
+
+# 对于没有数据的情况进行单独处理
+def insert_nil_xml(dic, lastFile  = False, upTest = False):
+    print("This is a empty excel")
+    doc = Document()
+    root = doc.createElement('ftc:ReportingGroup')
+    doc.appendChild(root)
+    cell_root = doc.createElement('ftc:NilReport')
+    root.appendChild(cell_root)
+
+    DocSpec = doc.createElement('ftc:DocSpec')
+    DocTypeIndic = doc.createElement('ftc:DocTypeIndic')
+
+    typeIndic = type_indic(lastFile, upTest)
+    DocTypeIndic.appendChild(doc.createTextNode(typeIndic))
+    DocRefId = doc.createElement('ftc:DocRefId')
+    Id = tin + '.' + str(uuid.uuid4())
+    DocRefId.appendChild(doc.createTextNode(Id))
+    DocSpec.appendChild(DocTypeIndic)
+    DocSpec.appendChild(DocRefId)
+    if lastFile:
+        CorrMessageRefId = doc.createElement('ftc:CorrMessageRefId')
+        CorrMessageRefId.appendChild(doc.createTextNode(dic['MessageRefId']))
+        CorrDocRefId = doc.createElement('ftc:CorrDocRefId')
+        CorrDocRefId.appendChild(doc.createTextNode(dic['Nil_DocRefId']))
+        DocSpec.appendChild(CorrMessageRefId)
+        DocSpec.appendChild(CorrDocRefId)
+
+    NoAccountToReport = doc.createElement('ftc:NoAccountToReport')
+    NoAccountToReport.appendChild(doc.createTextNode('yes'))
+    cell_root.appendChild(DocSpec)
+    cell_root.appendChild(NoAccountToReport)
+
+    root.appendChild(cell_root)
+    path = "datas\\Nilreport.xml"
+    if os.path.exists(path):
+        os.remove(path)
+    try:
+        with open(path, 'x+', encoding='UTF8') as file:
+            doc.writexml(file, addindent='\t', newl='\n', encoding='UTF-8')
+            print('Nilreport data write successfully')
+    except Exception as err:
+        print('错误：{err}'.format(err=err))
+
+    with open('FATCA.xml', 'r+', encoding='utf8') as temp_xml:
+        file = temp_xml.readlines()
+        print('open info.xml success')
+        file.insert(0, '<?xml version="1.0" encoding="UTF-8"?>')
+        # print(file)
+        file = insert_info(file, 'Nilreport')
+        path = 'final_file\\{0}.xml'.format(FATCAEntitySenderId)
+        if os.path.exists(path):
+            os.remove(path)
+        with open(path, 'x', encoding='UTF8') as tag_file:
+            for f in file:
+                tag_file.write(f)
+        print('End of data write')
 
 
 # 将存储数据与传输信息生成xml文件
@@ -123,16 +213,51 @@ def insert_xml():
         print('End of data write')
 
 
+def check_last_file(datetime):
+    path = 'final_file\\{0}.xml'.format(FATCAEntitySenderId)
+    lastfile = False
+    dic = {}
+    if os.path.exists(path):
+        tree = ET.parse(path)
+        root = tree.getroot()
+        if root[0].find('sfa:ReportingPeriod', sfa).text == '{0}-12-31'.format(str(datetime.year-1)):
+            lastfile = True
+            dic['MessageRefId'] = root[0].find('sfa:MessageRefId', sfa).text
+            dic['FI_DocRefId'] = root[1][0][4].find('ftc:DocRefId', ftc).text
+
+            ReportingGroup = root[1].findall('ftc:ReportingGroup', ftc)
+            for elemnts in ReportingGroup:
+                if elemnts.find('ftc:NilReport', ftc):
+                    dic['Nil_DocRefId'] = elemnts[0][0].find('ftc:DocRefId', ftc) .text
+                else:
+                    AccountReports = elemnts.findall('ftc:AccountReport', ftc)
+                    for AccountReport in  AccountReports:
+                        AccountNumber = AccountReport.find('ftc:AccountNumber', ftc).text
+                        dic[AccountNumber] = AccountReport[0].find('ftc:DocRefId', ftc).text
+            # print(dic)
+
+    return lastfile, dic
+
+
 class WriteXml(object):
 
-    def __init__(self, file_name, datetime):
+    def __init__(self, file_name, datetime, lastfile, dic):
         self.file_name = file_name
         self.checkNan = False
         self.doc = Document()
         self.datetime = datetime
+        self.lastfile = last_file
+        self.dic = dic
+
         # 创建根节点
         self.root = self.doc.createElement('ftc:ReportingGroup')
         self.doc.appendChild(self.root)
+
+
+    def check_numId(self,num):
+        if self.dic.get(num) is None:
+            return False
+        return True
 
     # 读取excel数据
     def get_data_from_excel(self):
@@ -154,9 +279,8 @@ class WriteXml(object):
         return np_datas
         # pass
 
-    # def create_NilReport(self):
     # 创建生成《FATCA_控权人_(Controlling Persons)》的AccountReport
-    def create_control_xml(self, data, num):
+    def create_control_xml(self, data):
 
         for i in [0, 2, 3, 4, 5, 6]:
             checknan = check_nan(str(data[i]))
@@ -173,12 +297,21 @@ class WriteXml(object):
         self.root.appendChild(cell_root)
         DocSpec = self.doc.createElement('ftc:DocSpec')
         DocTypeIndic = self.doc.createElement('ftc:DocTypeIndic')
-        DocTypeIndic.appendChild(self.doc.createTextNode('FATCA11'))
+        TypeIndic = type_indic(self.lastfile)
+        DocTypeIndic.appendChild(self.doc.createTextNode(TypeIndic))
         DocRefId = self.doc.createElement('ftc:DocRefId')
-        Id =tin+'.'+sta_str(get_md5str(num))
+        Id = tin + '.' + str(uuid.uuid4())
         DocRefId.appendChild(self.doc.createTextNode(Id))
         DocSpec.appendChild(DocTypeIndic)
         DocSpec.appendChild(DocRefId)
+        if self.check_numId(data[0]):
+            CorrMessageRefId = self.doc.createElement('ftc:CorrMessageRefId')
+            CorrMessageRefId.appendChild(self.doc.createTextNode(dic['MessageRefId']))
+            CorrDocRefId = self.doc.createElement('ftc:CorrDocRefId')
+            CorrDocRefId.appendChild(self.doc.createTextNode(dic[data[0]]))
+            DocSpec.appendChild(CorrMessageRefId)
+            DocSpec.appendChild(CorrDocRefId)
+
         AccountNumber = self.doc.createElement('ftc:AccountNumber')
         AccountNumber.appendChild(self.doc.createTextNode(str(data[0])))
         if data[1] !='nan':
@@ -257,7 +390,7 @@ class WriteXml(object):
         return signCurr
 
     # 创建生成《FATCA_主动非财务实体_(Active NFE)》的AccountReport
-    def create_act_xml(self, data, num):
+    def create_act_xml(self, data):
 
         for i in [0, 2, 3, 4, 5, 6, 7]:
             checknan = check_nan(str(data[i]))
@@ -276,10 +409,18 @@ class WriteXml(object):
         DocTypeIndic = self.doc.createElement('ftc:DocTypeIndic')
         DocTypeIndic.appendChild(self.doc.createTextNode('FATCA11'))
         DocRefId = self.doc.createElement('ftc:DocRefId')
-        Id = tin+'.'+sta_str(get_md5str(num))
+        Id = tin+'.'+str(uuid.uuid4())
         DocRefId.appendChild(self.doc.createTextNode(Id))
         DocSpec.appendChild(DocTypeIndic)
         DocSpec.appendChild(DocRefId)
+        if self.check_numId(data[0]):
+            CorrMessageRefId = self.doc.createElement('ftc:CorrMessageRefId')
+            CorrMessageRefId.appendChild(self.doc.createTextNode(dic['MessageRefId']))
+            CorrDocRefId = self.doc.createElement('ftc:CorrDocRefId')
+            CorrDocRefId.appendChild(self.doc.createTextNode(dic[data[0]]))
+            DocSpec.appendChild(CorrMessageRefId)
+            DocSpec.appendChild(CorrDocRefId)
+
         AccountNumber = self.doc.createElement('ftc:AccountNumber')
         AccountNumber.appendChild(self.doc.createTextNode(str(data[0])))
         AccountHolder = self.doc.createElement('ftc:AccountHolder')
@@ -330,10 +471,19 @@ class WriteXml(object):
         return signCurr
 
         # 将生成的数据单独存放在一个xml文件中
+
     def xml_group(self):
         datas = self.get_data_from_excel()
-        count = 0
-        sign = 0
+        checkEmpty = True
+        for data in datas[0]:
+            if not check_nan(data):
+                checkEmpty = False
+        # 如果校验为空，则返回标志 2
+        if checkEmpty is True:
+            return 2
+
+        count = 0  # count 数据行
+        sign = 0  # sign 数据异常标记
         if self.file_name == 'FATCA_主动非财务实体_(Active NFE)':
             for data in datas:
                 if sign == 0:
@@ -352,8 +502,9 @@ class WriteXml(object):
         if self.checkNan:
             messagebox.showinfo("警告！", "{0}数据中的AccountNumber、Name、Address、Account Holder Type、币种、结余存在空值，需要校验后重新执行 ".format(self.file_name))
         if sign != 0:
-            messagebox.showinfo("警告！", "{0}数据中的金额数值存在异常数据，需要校验后重新执行 ".format(self.file_name))
-
+            messagebox.showinfo("警告！", "{0}数据中的金额数值存在{1}个异常数据，需要校验后重新执行 ".format(self.file_name,sign))
+        if self.checkNan or sign != 0:
+            return 1
         path = "datas\\{0}.xml".format(self.file_name)
         if os.path.exists(path):
             os.remove(path)
@@ -363,15 +514,30 @@ class WriteXml(object):
                 print('{0} data write successfully'.format(self.file_name))
         except Exception as err:
             print('错误：{err}'.format(err=err))
+        return 0
 
 
 if __name__ == '__main__':
-
+    # 提示框设置
+    tip = tk.Tk()
+    tip.withdraw()
+    get_Id()
     datetime = dt.now()
-    set_xml(datetime)
-    work1 = WriteXml('FATCA_主动非财务实体_(Active NFE)', datetime)
+
+    # 检查是否已生成文件
+    last_file, dic = check_last_file(datetime)
+
+    # 配置FATCA.xml文件
+    set_xml(datetime, last_file, dic)
+
+    checkNonError1 = 0
+    checkNonError2 = 0
+    work1 = WriteXml('FATCA_主动非财务实体_(Active NFE)', datetime, last_file, dic)
     # work1.get_data_from_excel()
-    work2 = WriteXml('FATCA_控权人_(Controlling Persons)', datetime)
-    work1.xml_group()
-    work2.xml_group()
-    insert_xml()
+    work2 = WriteXml('FATCA_控权人_(Controlling Persons)', datetime, last_file, dic)
+    checkNonError1 = work1.xml_group()
+    checkNonError2 = work2.xml_group()
+    if checkNonError1 == 0 and checkNonError2 == 0:
+        insert_xml()
+    elif checkNonError1 == 2 and checkNonError2 == 2:
+        insert_nil_xml()
